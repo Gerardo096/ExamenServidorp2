@@ -5,35 +5,36 @@ $baseDatos = "usuarios";
 $usuario = "root";
 $password = "root";
 
-$conn = mysqli_connect($servidor, $usuario, $password, $baseDatos);
-if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
-}
+session_start();
 
-$email=$_POST['email'];
-$pass=$_POST['pass'];
 
+
+$email = $_POST['email'];
+$pass = $_POST['pass'];
 
 
 
 
-$sql = "SELECT * FROM usuarios WHERE email = $email AND pass= $pass";
+$con = new PDO("mysql:host=" . $GLOBALS['servidor'] . ";dbname=" . $GLOBALS['baseDatos'], $GLOBALS['usuario'], $GLOBALS['password']);
+$sql = $con->prepare("SELECT * FROM usuarios WHERE email = '$email';");
+$sql->execute();
 
-if (mysqli_query($conn, $sql)) {
-$numeroFilas=mysqli_num_rows($sql)
-if($numeroFilas !=0){
-    echo "Usuario correcto <br>";
-    echo'<a href="index.html">VOLVER</a><br>' ;
-}else{
-    echo "Usuario incorrecto <br>";
-    echo'<a href="index.html">VOLVER</a><br>' ;
-}
+
+$row = $sql->fetch(PDO::FETCH_ASSOC);
+
+if (!$row) {
+    echo "Este usuario no esta registrado en la base de datos, pruebe de nuevo";
 } else {
-echo "Error: " . $sql . "<br>" . mysqli_error($conn);
-echo'<a href="index.html">VOLVER</a><br>' ;
+
+    if (($pass == $row['password'])) {
+        $_SESSION['email'] = $row['email'];
+        $_SESSION['password'] = $row['password'];
+
+        echo "Usuario Correcto";
+    } else {
+        echo "Contraseña Incorrecta, pruebe de nuevo";
+    }
 }
-
-
-
+echo'<br><a href="index.html">Volver</a>';
 
 ?>
